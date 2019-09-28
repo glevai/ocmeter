@@ -5,7 +5,7 @@ logFilename: "emeter.log"
 meterValueMask: "[0-9]{6}[0-9?]?"
 meterValueLength: 6
 meterValueDecimals: 0
-meterMaxPower: 50000.
+meterMaxPower: 50.
 meterWindow: 13
 rotationDegrees: 0
 cannyThreshold1: 90
