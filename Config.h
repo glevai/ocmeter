@@ -7,12 +7,19 @@
 #define CONFIG_H_
 
 #include <string>
+#include <regex>
 
 class Config {
 public:
     Config();
     void saveConfig();
     void loadConfig();
+    void setConfigFilename(std::string name);
+
+
+    std::string getConfigFilename() const {
+        return _configFilename;
+    }
 
     int getDigitMaxHeight() const {
         return _digitMaxHeight;
@@ -28,6 +35,34 @@ public:
 
     std::string getTrainingDataFilename() const {
         return _trainingDataFilename;
+    }
+
+    std::string getMeterDataFilename() const {
+        return _meterDataFilename;
+    }
+
+    std::string getLogFilename() const {
+        return _logFilename;
+    }
+
+    std::string getMeterValueMask() const {
+        return _meterValueMask;
+    }
+
+    int getMeterValueLength() const {
+        return _meterValueLength;
+    }
+
+    int getMeterValueDecimals() const {
+        return _meterValueLength;
+    }
+
+    float getMeterMaxPower() const {
+        return _meterMaxPower;
+    }
+
+    int getMeterWindow() const {
+        return _meterWindow;
     }
 
     float getOcrMaxDist() const {
@@ -51,6 +86,15 @@ public:
     }
 
 private:
+    std::string _configFilename;
+    std::string _trainingDataFilename;
+    std::string _meterDataFilename;
+    std::string _logFilename;
+    std::string _meterValueMask;
+    int _meterValueLength;
+	int _meterValueDecimals;
+    float _meterMaxPower;
+    int _meterWindow;
     int _rotationDegrees;
     float _ocrMaxDist;
     int _digitMinHeight;
@@ -58,7 +102,6 @@ private:
     int _digitYAlignment;
     int _cannyThreshold1;
     int _cannyThreshold2;
-    std::string _trainingDataFilename;
     int _whiteThreshold;
 	};
 

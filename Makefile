@@ -1,6 +1,6 @@
 .PHONY: clean, mrproper
 
-PROJECT = emeter
+PROJECT = ocmeter
 
 OBJS = $(addprefix $(OUTDIR)/,\
   Directory.o \

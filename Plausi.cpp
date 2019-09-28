@@ -8,14 +8,16 @@
 #include <utility>
 #include <ctime>
 #include <cstdlib>
+#include <regex>
 
 #include <log4cpp/Category.hh>
 #include <log4cpp/Priority.hh>
 
 #include "Plausi.h"
+#include "Config.h"
 
-Plausi::Plausi(double maxPower, int window) :
-        _maxPower(maxPower), _window(window), _value(-1.), _time(0) {
+Plausi::Plausi(const Config & config) :
+        config(config),_value(-1.), _time(0) {
 }
 
 bool Plausi::check(const std::string& value, time_t time) {
@@ -24,25 +26,19 @@ bool Plausi::check(const std::string& value, time_t time) {
         rlog.info("Plausi check: %s of %s", value.c_str(), ctime(&time));
     }
 
-    if (value.length() != 7) {
-        // exactly 7 digits
-        rlog.info("Plausi rejected: exactly 7 digits");
-        return false;
-    }
-    if ((value.find_first_of('?') != std::string::npos) && (value.find_first_of('?') != 6)) {
-        // no '?' char
-        rlog.info("Plausi rejected: no '?' char on first 6 numbers");
+    if (!std::regex_match (value,std::regex(config.getMeterValueMask()))) {
+        rlog.info("Plausi rejected: value does not match with regex (%s : %s)",value,config.getMeterValueMask());
         return false;
     }
 
-    double dval = atof(value.substr(0,6).c_str()); // Nálam 2 tizedes van (/100.)
+    double dval = (config.getMeterValueDecimals()>0)?atof(value.substr(0,config.getMeterValueLength()).c_str())/(config.getMeterValueDecimals()*10):atof(value.substr(0,config.getMeterValueLength()).c_str());
     _queue.push_back(std::make_pair(time, dval));
 
-    if (_queue.size() < _window) {
+    if (_queue.size() < config.getMeterWindow()) {
         rlog.info("Plausi rejected: not enough values: %d", _queue.size());
         return false;
     }
-    if (_queue.size() > _window) {
+    if (_queue.size() > config.getMeterWindow()) {
         _queue.pop_front();
     }
 
@@ -59,9 +55,9 @@ bool Plausi::check(const std::string& value, time_t time) {
             return false;
         }
         double power = (it->second - dval) / (it->first - time) * 3600.;
-        if (power > _maxPower) {
+        if (power > config.getMeterMaxPower()) {
             // consumption of energy must not be greater than limit
-            rlog.info("Plausi rejected: consumption of energy %.3f must not be greater than limit %.3f", power, _maxPower);
+            rlog.info("Plausi rejected: consumption of energy %.3f must not be greater than limit %.3f", power, config.getMeterMaxPower());
             return false;
         }
         time = it->first;
@@ -73,15 +69,15 @@ bool Plausi::check(const std::string& value, time_t time) {
     if (rlog.isDebugEnabled()) {
         rlog.debug(queueAsString());
     }
-    time_t candTime = _queue.at(_window/2).first;
-    double candValue = _queue.at(_window/2).second;
+    time_t candTime = _queue.at(config.getMeterWindow()/2).first;
+    double candValue = _queue.at(config.getMeterWindow()/2).second;
     if (candValue < _value) {
         rlog.info("Plausi rejected: value must be >= previous checked value");
         return false;
     }
     double power = (candValue - _value) / (candTime - _time) * 3600.;
-    if (power > _maxPower) {
-        rlog.info("Plausi rejected: consumption of energy (checked value) %.3f must not be greater than limit %.3f", power, _maxPower);
+    if (power > config.getMeterMaxPower()) {
+        rlog.info("Plausi rejected: consumption of energy (checked value) %.3f must not be greater than limit %.3f", power, config.getMeterMaxPower());
         return false;
     }
 
@@ -89,7 +85,7 @@ bool Plausi::check(const std::string& value, time_t time) {
     _time = candTime;
     _value = candValue;
     if (rlog.isInfoEnabled()) {
-        rlog.info("Plausi accepted: %f of %s", _value, ctime(&_time));
+        rlog.info("Plausi accepted: %.*f of %s", config.getMeterValueDecimals(), _value, ctime(&_time));
     }
     return true;
 }
@@ -108,12 +104,11 @@ std::string Plausi::queueAsString() {
     str += "[";
     std::deque<std::pair<time_t, double> >::const_iterator it = _queue.begin();
     for (; it != _queue.end(); ++it) {
-        sprintf(buf, "%f", it->second); // %.2f
+        sprintf(buf, "%.*f", config.getMeterValueDecimals(), it->second); // %.2f
         str += buf;
         str += ", ";
     }
     str += "]";
     return str;
 }
-
 

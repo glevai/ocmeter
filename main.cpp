@@ -49,7 +49,7 @@ static void testOcr(ImageInput* pImageInput) {
     proc.debugDigits(true);
     proc.debugEdges(true);
 
-    Plausi plausi;
+    Plausi plausi(config);
 
     KNearestOcr ocr(config);
     if (! ocr.loadTrainingData()) {
@@ -230,12 +230,11 @@ static void writeData(ImageInput* pImageInput) {
     //proc.debugEdges(true);
     //proc.debugSkew(true);
 	
-    Plausi plausi;
+    Plausi plausi(config);
 
     //RRDatabase rrd("emeter.rrd");
 
-	std::fstream emfile ("emeter.txt", std::ios::out | std::ios::app);
-	//std::fstream emfile2 ("/media/onedriveshare/emeter.txt", std::ios::out | std::ios::app);
+	std::fstream emfile (config.getMeterDataFilename(), std::ios::out | std::ios::app);
 	
     struct stat st;
 
@@ -255,21 +254,19 @@ static void writeData(ImageInput* pImageInput) {
         bool recognized = false;
 		//int key = cv::waitKey(1000)%256;
 
-        if (proc.getOutput().size() == 7) {
+        //if (proc.getOutput().size() == 7) {
             result = ocr.recognize(proc.getOutput());
             if (plausi.check(result, pImageInput->getTime())) {
                 //rrd.update(plausi.getCheckedTime(), plausi.getCheckedValue());
 				time_t checkedtime = plausi.getCheckedTime();
-				char tgmt[20];
-				strftime(tgmt, 20, "%Y-%m-%d %H:%M:%S", gmtime(&checkedtime));
 				char tlocal[20];
 				strftime(tlocal, 20, "%Y-%m-%d %H:%M:%S", localtime(&checkedtime));
 				char row[200];
-				sprintf(row, "%s;%s;%.2f", tgmt, tlocal, plausi.getCheckedValue());
+				sprintf(row, "%s;%.*f", tlocal, config.getMeterValueDecimals(), plausi.getCheckedValue());
 				emfile << row << std::endl;
 				recognized = true;
             }
-        }
+        //}
         /*
         if (((recognized == false)&& ((previous_result != result)&&(previous_result2 != result)))){ // write debug image when not recognized
             pImageInput->setOutputDir("imgdebug");
@@ -285,10 +282,11 @@ static void writeData(ImageInput* pImageInput) {
 static void usage(const char* progname) {
     std::cout << "Program to read and recognize the counter of an electricity meter with OpenCV.\n";
     std::cout << "Version: " << VERSION << std::endl;
-    std::cout << "Usage: " << progname << " [-i <dir>|-c <cam>|-p <url>|-u <url>] [-l|-t|-a|-w|-o <dir>] [-s <delay>] [-v <level>\n";
+    std::cout << "Usage: " << progname << " -c <config file> [-i <dir>|-n <cam>|-p <url>|-u <url>] [-l|-t|-a|-w|-o <dir>] [-s <delay>] [-v <level>\n";
+    std::cout << "  -c <config file name> : config file name (e.g. config.yml).\n";
     std::cout << "\nImage input:\n";
     std::cout << "  -i <image directory> : read image files (png) from directory.\n";
-    std::cout << "  -c <camera number> : read images from camera.\n";
+    std::cout << "  -n <camera number> : read images from camera.\n";
     std::cout << "  -p <ip camera url> : read images from ip camera.\n";
     std::cout << "  -u <image url> : read images from web.\n";
     std::cout << "\nOperation:\n";
@@ -303,7 +301,9 @@ static void usage(const char* progname) {
 }
 
 static void configureLogging(const std::string & priority = "INFO", bool toConsole = false) {
-    log4cpp::Appender *fileAppender = new log4cpp::FileAppender("default", "emeocv.log");
+    Config config;
+    config.loadConfig();
+    log4cpp::Appender *fileAppender = new log4cpp::FileAppender("default", config.getLogFilename());
     log4cpp::PatternLayout* layout = new log4cpp::PatternLayout();
     layout->setConversionPattern("%d{%d.%m.%Y %H:%M:%S} %p: %m%n");
     fileAppender->setLayout(layout);
@@ -325,14 +325,20 @@ int main(int argc, char **argv) {
     std::string logLevel = "DEBUG";
     char cmd = 0;
     int cmdCount = 0;
+    Config config;
+    config.loadConfig();
 
-    while ((opt = getopt(argc, argv, "i:p:c:u:ltawLs:o:v:h")) != -1) {
+    while ((opt = getopt(argc, argv, "i:p:n:u:ltawLs:o:v:h")) != -1) {
         switch (opt) {
+            case 'c':
+                config.setConfigFilename(optarg);
+                inputCount++;
+                break;
             case 'i':
                 pImageInput = new DirectoryInput(Directory(optarg, ".jpg"));
                 inputCount++;
                 break;
-            case 'c':
+            case 'n':
                 pImageInput = new CameraInput(atoi(optarg));
                 inputCount++;
                 break;

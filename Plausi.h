@@ -11,19 +11,20 @@
 #include <utility>
 #include <ctime>
 
+#include "Config.h"
+
 class Plausi {
 public:
-    Plausi(double maxPower = 11520. /*kWh*/, int window = 13);
+    Plausi(const Config & config);
     bool check(const std::string & value, time_t time);
     double getCheckedValue();
     time_t getCheckedTime();
 private:
     std::string queueAsString();
-    double _maxPower;
-    int _window;
     std::deque<std::pair<time_t, double> > _queue;
     time_t _time;
     double _value;
+    Config config;
 };
 
 #endif /* PLAUSI_H_ */
