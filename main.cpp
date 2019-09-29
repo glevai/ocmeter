@@ -328,7 +328,7 @@ int main(int argc, char **argv) {
     Config config;
     config.loadConfig();
 
-    while ((opt = getopt(argc, argv, "i:p:n:u:ltawLs:o:v:h")) != -1) {
+    while ((opt = getopt(argc, argv, "c:i:p:n:u:ltawLs:o:v:h")) != -1) {
         switch (opt) {
             case 'c':
                 config.setConfigFilename(optarg);

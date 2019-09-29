@@ -2,7 +2,7 @@
 trainingDataFilename: "trainctr.yml"
 meterDataFilename: "emeter.txt"
 logFilename: "emeter.log"
-meterValueMask: "[0-9]{6}[0-9?]?"
+meterValueMask: "^1[0-9]{5}[0-9?]?$"
 meterValueLength: 6
 meterValueDecimals: 0
 meterMaxPower: 50.

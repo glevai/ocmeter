@@ -1,10 +1,17 @@
 %YAML:1.0
+trainingDataFilename: "trainctr.yml"
+meterDataFilename: "emeter.txt"
+logFilename: "emeter.log"
+meterValueMask: "[0-9]{6}[0-9?]?"
+meterValueLength: 6
+meterValueDecimals: 0
+meterMaxPower: 50.
+meterWindow: 13
 rotationDegrees: 0
 cannyThreshold1: 90
-cannyThreshold2: 150
+cannyThreshold2: 170
 digitMinHeight: 24
 digitMaxHeight: 35
 digitYAlignment: 15
-ocrMaxDist: 500000.
-trainingDataFilename: "trainctr.yml"
+ocrMaxDist: 400000.
 whiteTreshold: 120

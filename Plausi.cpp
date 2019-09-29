@@ -27,7 +27,7 @@ bool Plausi::check(const std::string& value, time_t time) {
     }
 
     if (!std::regex_match (value,std::regex(config.getMeterValueMask()))) {
-        rlog.info("Plausi rejected: value does not match with regex (%s : %s)",value,config.getMeterValueMask());
+        rlog.info("Plausi rejected: value (%s) does not match with regex",value.c_str());
         return false;
     }
 
