@@ -34,6 +34,7 @@
 #include "Plausi.h"
 
 static int delay = 1000;
+Config config;
 
 #ifndef VERSION
 #define VERSION "0.9.6"
