@@ -12,11 +12,9 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/ml/ml.hpp>
 
-#include "Config.h"
-
 class KNearestOcr {
 public:
-    KNearestOcr(const Config & config);
+    KNearestOcr();
     virtual ~KNearestOcr();
 
     int learn(const cv::Mat & img);
@@ -35,7 +33,6 @@ public:
     void initModel();
 
     CvKNearest* _pModel;
-    Config _config;
 };
 
 #endif /* KNEARESTOCR_H_ */

@@ -11,11 +11,10 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "ImageInput.h"
-#include "Config.h"
 
 class ImageProcessor {
 public:
-    ImageProcessor(const Config & config);
+    ImageProcessor();
 
     void setOrientation(int rotationDegrees);
     void setInput(cv::Mat & img);
@@ -27,8 +26,8 @@ public:
     void debugEdges(bool bval = true);
     void debugDigits(bool bval = true);
     void showImage();
-    void saveConfig();
-    void loadConfig();
+    //void saveConfig();
+    //void loadConfig();
 
 private:
     void rotate(double rotationDegrees);
@@ -47,7 +46,6 @@ private:
     cv::Mat _imgBW;
     cv::Mat _imgFiltered;
     std::vector<cv::Mat> _digits;
-    Config _config;
     bool _debugWindow;
     bool _debugSkew;
     bool _debugEdges;

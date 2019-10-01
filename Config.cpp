@@ -8,6 +8,8 @@
 
 #include "Config.h"
 
+Config config;
+
 Config::Config() :
     _configFilename("config.yml"),
     _trainingDataFilename("trainctr.yml"),

@@ -15,6 +15,7 @@
 #include <log4cpp/Priority.hh>
 
 #include "ImageInput.h"
+#include "Config.h"
 
 ImageInput::~ImageInput() {
 }
@@ -124,13 +125,13 @@ bool URLInput::nextImage() {
     int ret;
 	time(&_time);
     // download image from url
-    ret = system("wget -q -O meter.jpg http://192.168.0.163:8080/photoaf.jpg"); // + _urlImageSource);
+    ret = system(("wget -q -O " + config.getMeterDataFilename() + ".jpg " + _urlImageSource).c_str());
 
 	// load image
-    _img = cv::imread("meter.jpg");
+    _img = cv::imread(config.getMeterDataFilename() + ".jpg");
     log4cpp::Category::getRoot() << log4cpp::Priority::INFO << "Image captured: " << ret;
 
-	ret = system("rm meter.jpg");
+	ret = system(("rm " + config.getMeterDataFilename() + ".jpg ").c_str());
 
     // save copy of image if requested
     if (!_outDir.empty()) {

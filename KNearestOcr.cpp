@@ -15,10 +15,13 @@
 
 #include <exception>
 
+#include "Config.h"
+
 #include "KNearestOcr.h"
 
-KNearestOcr::KNearestOcr(const Config & config) :
-        _pModel(0), _config(config) {
+
+KNearestOcr::KNearestOcr() :
+        _pModel(0) {
 }
 
 KNearestOcr::~KNearestOcr() {
@@ -67,7 +70,7 @@ int KNearestOcr::learn(const std::vector<cv::Mat>& images) {
  * Save training data to file.
  */
 void KNearestOcr::saveTrainingData() {
-    cv::FileStorage fs(_config.getTrainingDataFilename(), cv::FileStorage::WRITE);
+    cv::FileStorage fs(config.getTrainingDataFilename(), cv::FileStorage::WRITE);
     fs << "samples" << _samples;
     fs << "responses" << _responses;
     fs.release();
@@ -77,7 +80,7 @@ void KNearestOcr::saveTrainingData() {
  * Load training data from file and init model.
  */
 bool KNearestOcr::loadTrainingData() {
-    cv::FileStorage fs(_config.getTrainingDataFilename(), cv::FileStorage::READ);
+    cv::FileStorage fs(config.getTrainingDataFilename(), cv::FileStorage::READ);
     if (fs.isOpened()) {
         fs["samples"] >> _samples;
         fs["responses"] >> _responses;
@@ -103,7 +106,7 @@ char KNearestOcr::recognize(const cv::Mat& img) {
         cv::Mat results, neighborResponses, dists;
         float result = _pModel->find_nearest(prepareSample(img), 2, results, neighborResponses, dists);
         if (0 == int(neighborResponses.at<float>(0, 0) - neighborResponses.at<float>(0, 1))
-                && dists.at<float>(0, 0) < _config.getOcrMaxDist()) {
+                && dists.at<float>(0, 0) < config.getOcrMaxDist()) {
             // valid character if both neighbors have the same value and distance is below ocrMaxDist
             cres = '0' + (int) result;
         } else if (rlog.isInfoEnabled()) {

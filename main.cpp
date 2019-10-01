@@ -40,18 +40,18 @@ static int delay = 1000;
 #endif
 
 static void testOcr(ImageInput* pImageInput) {
+    
     log4cpp::Category::getRoot().info("testOcr");
 
-    Config config;
-    config.loadConfig();
-    ImageProcessor proc(config);
+    ImageProcessor proc;
     proc.debugWindow();
     proc.debugDigits(true);
     proc.debugEdges(true);
 
-    Plausi plausi(config);
+    Plausi plausi;
+    char value[10];
 
-    KNearestOcr ocr(config);
+    KNearestOcr ocr;
     if (! ocr.loadTrainingData()) {
         std::cout << "Failed to load OCR training data\n";
         return;
@@ -66,7 +66,8 @@ static void testOcr(ImageInput* pImageInput) {
         std::string result = ocr.recognize(proc.getOutput());
         std::cout << result;
         if (plausi.check(result, pImageInput->getTime())) {
-            std::cout << "  " << std::fixed << std::setprecision(2) << plausi.getCheckedValue() << std::endl;
+            sprintf(value, "%.*f", config.getMeterValueDecimals(), plausi.getCheckedValue());
+            std::cout << "  " << value << std::endl;
         } else {
             std::cout << "  -------" << std::endl;
         }
@@ -82,12 +83,10 @@ static void testOcr(ImageInput* pImageInput) {
 static void learnOcr(ImageInput* pImageInput) {
     log4cpp::Category::getRoot().info("learnOcr");
 
-    Config config;
-    config.loadConfig();
-    ImageProcessor proc(config);
+    ImageProcessor proc;
     proc.debugWindow();
 
-    KNearestOcr ocr(config);
+    KNearestOcr ocr;
     ocr.loadTrainingData();
     std::cout << "Entering OCR training mode!\n";
     std::cout << "<0>..<9> to answer digit, <space> to ignore digit, <s> to save and quit, <q> to quit without saving.\n";
@@ -117,12 +116,10 @@ static void learnOcr(ImageInput* pImageInput) {
 static void checkLearnedOcr() {
     log4cpp::Category::getRoot().info("learnOcr");
 
-    Config config;
-    config.loadConfig();
-    ImageProcessor proc(config);
+    ImageProcessor proc;
     proc.debugWindow();
 
-    KNearestOcr ocr(config);
+    KNearestOcr ocr;
     ocr.loadTrainingData();
     std::cout << "Entering learned OCR checking mode!\n";
     std::cout << "<0>..<9> to answer digit if it is not correck, <space> to ignore digit, <d> to delete digit, <s> to save and quit, <q> to quit without saving.\n";
@@ -170,9 +167,7 @@ static void checkLearnedOcr() {
 static void adjustCamera(ImageInput* pImageInput) {
     log4cpp::Category::getRoot().info("adjustCamera");
 
-    Config config;
-    config.loadConfig();
-    ImageProcessor proc(config);
+    ImageProcessor proc;
     proc.debugWindow(true);
     proc.debugDigits(true);
     proc.debugEdges(true);
@@ -221,16 +216,14 @@ static void capture(ImageInput* pImageInput) {
 static void writeData(ImageInput* pImageInput) {
     log4cpp::Category::getRoot().info("writeData");
 
-    Config config;
-    config.loadConfig();
-    ImageProcessor proc(config);
+    ImageProcessor proc;
 
     //proc.debugWindow(true);
     //proc.debugDigits(true);
     //proc.debugEdges(true);
     //proc.debugSkew(true);
 	
-    Plausi plausi(config);
+    Plausi plausi;
 
     //RRDatabase rrd("emeter.rrd");
 
@@ -238,7 +231,7 @@ static void writeData(ImageInput* pImageInput) {
 	
     struct stat st;
 
-    KNearestOcr ocr(config);
+    KNearestOcr ocr;
     if (! ocr.loadTrainingData()) {
         std::cout << "Failed to load OCR training data\n";
         return;
@@ -301,8 +294,6 @@ static void usage(const char* progname) {
 }
 
 static void configureLogging(const std::string & priority = "INFO", bool toConsole = false) {
-    Config config;
-    config.loadConfig();
     log4cpp::Appender *fileAppender = new log4cpp::FileAppender("default", config.getLogFilename());
     log4cpp::PatternLayout* layout = new log4cpp::PatternLayout();
     layout->setConversionPattern("%d{%d.%m.%Y %H:%M:%S} %p: %m%n");
@@ -325,9 +316,7 @@ int main(int argc, char **argv) {
     std::string logLevel = "DEBUG";
     char cmd = 0;
     int cmdCount = 0;
-    Config config;
-    config.loadConfig();
-
+    
     while ((opt = getopt(argc, argv, "c:i:p:n:u:ltawLs:o:v:h")) != -1) {
         switch (opt) {
             case 'c':
@@ -386,6 +375,8 @@ int main(int argc, char **argv) {
         usage(argv[0]);
         exit(EXIT_FAILURE);
     }
+
+    config.loadConfig();
 
     configureLogging(logLevel, cmd == 'a');
 

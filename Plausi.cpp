@@ -16,8 +16,8 @@
 #include "Plausi.h"
 #include "Config.h"
 
-Plausi::Plausi(const Config & config) :
-        config(config),_value(-1.), _time(0) {
+Plausi::Plausi() :
+        _value(-1.), _time(0) {
 }
 
 bool Plausi::check(const std::string& value, time_t time) {

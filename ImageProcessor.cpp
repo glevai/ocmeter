@@ -25,8 +25,8 @@ public:
     }
 };
 
-ImageProcessor::ImageProcessor(const Config & config) :
-        _config(config), _debugWindow(false), _debugSkew(false), _debugDigits(true), _debugEdges(false) {
+ImageProcessor::ImageProcessor() :
+        _debugWindow(false), _debugSkew(false), _debugDigits(true), _debugEdges(false) {
 }
 
 /**
@@ -103,14 +103,14 @@ void ImageProcessor::process() {
 	cvtColor(_img, _imgGray, CV_BGR2GRAY);
 
     // initial rotation to get the digits up
-    rotate(_config.getRotationDegrees());
+    rotate(config.getRotationDegrees());
 
     // detect and correct remaining skew (+- 30 deg)
     float skew_deg = detectSkew();
     rotate(skew_deg);
 
     // make BW image
-	threshold(_imgGray,_imgBW, _config.getWhiteThreshold() /*threshold_value*/, 255, 0 /*threshold_type*/ );
+	threshold(_imgGray,_imgBW, config.getWhiteThreshold() /*threshold_value*/, 255, 0 /*threshold_type*/ );
 	
     // find and isolate counter digits
     findCounterDigits();
@@ -208,7 +208,7 @@ float ImageProcessor::detectSkew() {
 cv::Mat ImageProcessor::cannyEdges() {
     cv::Mat edges;
     // detect edges
-    cv::Canny(_imgGray, edges, _config.getCannyThreshold1(), _config.getCannyThreshold2());
+    cv::Canny(_imgGray, edges, config.getCannyThreshold1(), config.getCannyThreshold2());
     return edges;
 }
 
@@ -223,7 +223,7 @@ void ImageProcessor::findAlignedBoxes(std::vector<cv::Rect>::const_iterator begi
     result.push_back(start);
 
     for (; it != end; ++it) {
-        if (abs(start.y - it->y) < _config.getDigitYAlignment() && abs(start.height - it->height) < _config.getDigitYAlignment()/2) {
+        if (abs(start.y - it->y) < config.getDigitYAlignment() && abs(start.height - it->height) < config.getDigitYAlignment()/2) {
             result.push_back(*it);
         }
     }
@@ -237,7 +237,7 @@ void ImageProcessor::filterContours(std::vector<std::vector<cv::Point> >& contou
     // filter contours by bounding rect size
     for (size_t i = 0; i < contours.size(); i++) {
         cv::Rect bounds = cv::boundingRect(contours[i]);
-        if (bounds.height > _config.getDigitMinHeight() && bounds.height < _config.getDigitMaxHeight()
+        if (bounds.height > config.getDigitMinHeight() && bounds.height < config.getDigitMaxHeight()
                 && bounds.width > (bounds.height/4 ) && bounds.width < bounds.height) {
             boundingBoxes.push_back(bounds);
             filteredContours.push_back(contours[i]);
@@ -285,7 +285,7 @@ void ImageProcessor::findCounterDigits() {
 	int prevX = 0;
     for (int i = 0; i < alignedBoundingBoxes.size(); ++i) {
 		// Csak akkor, ha nincs átfedés
-		if (alignedBoundingBoxes[i].x > prevX+_config.getDigitMinHeight()/2) {
+		if (alignedBoundingBoxes[i].x > prevX+config.getDigitMinHeight()/2) {
 			okBoundingBoxes.push_back(alignedBoundingBoxes[i]);
 			prevX = alignedBoundingBoxes[i].x;
 		}

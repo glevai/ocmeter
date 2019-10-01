@@ -106,3 +106,6 @@ private:
 	};
 
 #endif /* CONFIG_H_ */
+
+extern Config config;
+
