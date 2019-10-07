@@ -12,10 +12,8 @@
 class Config {
 public:
     Config();
-    void saveConfig();
-    void loadConfig();
-    void setConfigFilename(std::string name);
-
+    void saveConfig(std::string name = "");
+    void loadConfig(std::string name = "");
 
     std::string getConfigFilename() const {
         return _configFilename;

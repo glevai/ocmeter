@@ -30,7 +30,9 @@ Config::Config() :
     _whiteThreshold(90) {
 }
 
-void Config::saveConfig() {
+void Config::saveConfig(std::string name = "") {
+    if name != ""
+        _configFilename = name;
     cv::FileStorage fs(_configFilename, cv::FileStorage::WRITE);
     fs << "trainingDataFilename" << _trainingDataFilename;
     fs << "meterDataFilename" << _meterDataFilename;
@@ -51,7 +53,9 @@ void Config::saveConfig() {
     fs.release();
 }
 
-void Config::loadConfig() {
+void Config::loadConfig(std::string name = "") {
+    if name != ""
+        _configFilename = name;
     cv::FileStorage fs(_configFilename, cv::FileStorage::READ);
     if (fs.isOpened()) {
         fs["trainingDataFilename"] >> _trainingDataFilename;

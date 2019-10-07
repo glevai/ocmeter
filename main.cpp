@@ -34,6 +34,7 @@
 #include "Plausi.h"
 
 static int delay = 1000;
+std::string configFilename;
 
 #ifndef VERSION
 #define VERSION "0.9.6"
@@ -268,6 +269,7 @@ static void writeData(ImageInput* pImageInput) {
         }
 		*/
         usleep(delay*1000L);
+        //config.loadConfig();  // load config data periodically
     }
 	emfile.close();
 }
@@ -320,7 +322,8 @@ int main(int argc, char **argv) {
     while ((opt = getopt(argc, argv, "c:i:p:n:u:ltawLs:o:v:h")) != -1) {
         switch (opt) {
             case 'c':
-                config.setConfigFilename(optarg);
+                configFilename=optarg;
+                //config.setConfigFilename(optarg);
                 inputCount++;
                 break;
             case 'i':
@@ -376,7 +379,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    config.loadConfig();
+    config.loadConfig(configFilename);
 
     configureLogging(logLevel, cmd == 'a');
 
